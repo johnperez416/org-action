@@ -16,6 +16,7 @@ type Permission = {
     administration: "read" | undefined;
     pull_requests: "write" | undefined;
     issues: "read" | "write" | undefined;
+    workflows: "read" | "write" | undefined;
 };
 type Input = {
     appId: string;
@@ -54,6 +55,7 @@ export const prepareInput = (): Input => {
         checks: hasPermission("checks-rw") ? "write" : undefined,
         administration: hasPermission("administration-ro") ? "read" : undefined,
         pull_requests: hasPermission("pull-requests-rw") ? "write" : undefined,
+        workflows: hasPermission("workflows-rw") ? "write" : undefined,
         issues: hasPermission("issues-rw")
             ? "write"
             : hasPermission("issues-ro")
