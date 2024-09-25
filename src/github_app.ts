@@ -12,6 +12,11 @@ import isBase64 from "is-base64";
 type Permission = {
     contents: "read" | "write" | undefined;
     actions: "write" | undefined;
+    checks: "write" | undefined;
+    administration: "read" | undefined;
+    pull_requests: "write" | undefined;
+    issues: "read" | "write" | undefined;
+    workflows: "read" | "write" | undefined;
 };
 type Input = {
     appId: string;
@@ -46,7 +51,16 @@ export const prepareInput = (): Input => {
             : hasPermission("contents-ro")
             ? "read"
             : undefined,
-        actions: hasPermission("actions-rw") ? "write" : undefined
+        actions: hasPermission("actions-rw") ? "write" : undefined,
+        checks: hasPermission("checks-rw") ? "write" : undefined,
+        administration: hasPermission("administration-ro") ? "read" : undefined,
+        pull_requests: hasPermission("pull-requests-rw") ? "write" : undefined,
+        workflows: hasPermission("workflows-rw") ? "write" : undefined,
+        issues: hasPermission("issues-rw")
+            ? "write"
+            : hasPermission("issues-ro")
+            ? "read"
+            : undefined,
     };
 
     return {
@@ -78,6 +92,21 @@ export const installationToken = async (input: Input) => {
     } catch (error: unknown) {
         throw new Error(
             `Could not get repo installation. Is the app installed on this org? : ${ensureError(
+                error
+            )}`
+        );
+    }
+
+    try {
+        ({
+            data: { id: installationId }
+        } = await octokit.rest.apps.getRepoInstallation({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo
+        }));
+    } catch (error: unknown) {
+        throw new Error(
+            `org-action을 해당 레포에서 사용하려면 #req-devops 채널에 요청해주세요 : ${ensureError(
                 error
             )}`
         );
